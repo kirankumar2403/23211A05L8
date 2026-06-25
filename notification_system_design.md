@@ -129,9 +129,6 @@ This notification system is simple, easy to understand, and good for both normal
 
 # Stage 2
 
-
-# Stage 2
-
 ## Notification Storage Design
 
 For storing notification data, I would choose **PostgreSQL**. I chose PostgreSQL because the notification data has a clear structure, and SQL is useful when we want to search, filter, sort, and update records reliably. It also works well when the data grows and when we need transactions for read and update operations.
@@ -298,3 +295,36 @@ ON notifications (studentID, isRead, createdAt);
 
 If this query run often, then this index helps us to fetch the data fastly.
 
+
+# Stage 4
+
+## Problem
+
+The notifications are getting fetched on every page load for every student. Because of that, the database is getting overloaded and the app is becoming slow.
+
+## My Suggestion
+
+I would not fetch all notifications every time the page loads. Instead, I would use these ideas:
+
+1. Cache the notifications for a short time using local cache.
+2. Load only the latest notifications first.
+3. Use pagination if there are many records.
+4. Use real-time updates only for new notifications.
+
+## How It Will Help
+
+If we use caching, the server does not need to hit the database again and again for the same data. This will make the app faster.
+
+If we use pagination, the app will load only some notifications at a time. This reduces the load on the database.
+
+If we use real-time updates, only new notifications will come through the stream, so the whole list does not need to be fetched again.
+
+## Tradeoffs
+
+- Caching is fast, but the data can become a little old.
+- Pagination is simple, but the user may need to click next page.
+- Real-time updates are good, but they are a little more complex to build.
+
+## Final Answer
+
+I think the best solution is to combine caching, pagination, and real-time updates. This will reduce the database load and improve the user experience.
