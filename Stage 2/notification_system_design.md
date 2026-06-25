@@ -21,7 +21,7 @@ For storing notification data, I would choose **PostgreSQL**. I chose PostgreSQL
 | user_id | UUID | logged user |
 | title | VARCHAR(200) |title description |
 | message | TEXT | message |
-| type | VARCHAR(50) | Notification type |
+| notification_type | VARCHAR(50) | Notification type |
 | read | BOOLEAN | Read or unread |
 | created_at | TIMESTAMP |
 | updated_at | TIMESTAMP |
@@ -35,7 +35,7 @@ CREATE TABLE notifications (
   user_id UUID NOT NULL,
   title VARCHAR(200) NOT NULL,
   message TEXT NOT NULL,
-  type VARCHAR(50) NOT NULL,
+  notification_type VARCHAR(50) NOT NULL,
   read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -61,7 +61,7 @@ If the number of notifications becomes large, I would solve it by:
 ### 1. Get all notifications
 
 ```sql
-SELECT id, title, message, type, read, created_at
+SELECT id, title, message, notification_type, read, created_at
 FROM notifications
 WHERE user_id = id
 ORDER BY created_at DESC
@@ -71,7 +71,7 @@ LIMIT $2 OFFSET $3;
 ### 2. Get one notification by id
 
 ```sql
-SELECT id, title, message, type, read, created_at
+SELECT id, title, message, notification_type, read, created_at
 FROM notifications
 WHERE user_id = $1 AND id = $2;
 ```
