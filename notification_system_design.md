@@ -373,3 +373,88 @@ function notify_all(student_ids: array, message: string):
 ## Final Answer
 
 The old implementation is not good for large scale because it can fail in the middle and it is slow. I would recommend to save the notification first and then send email and app notification in background jobs.
+
+# Stage 6
+
+## Priority Inbox
+
+For this stage, I would build a Priority Inbox that shows the most important unread notifications first. I would use the notification API directly and keep the data in memory instead of storing it in a database.
+
+## My Approach
+
+I would fetch notifications from the Notification API and then sort them in memory.
+
+After that, I would give each notification a score based on:
+
+- notification type
+- how recent it is
+
+I would use this order for priority:
+
+- placement = highest priority
+- result = medium priority
+- event = lower priority
+
+Newer notifications should also get a higher score than older ones.
+
+## How I Would Show Top 10
+
+1. Call the API and get all notifications.
+2. Filter only unread notifications.
+3. Give each notification a priority score.
+4. Sort the notifications by score and date.
+5. Keep only the top 10.
+
+## Making it Efficient
+
+When a new notification comes, I would update the in-memory list instead of loading everything again.
+
+This will help because:
+
+- it is faster
+- it avoids extra database work
+- it keeps the inbox updated quickly
+
+## Sample Response
+
+```json
+{
+	"notifications": [
+		{
+			"id": "n_101",
+			"type": "Placement",
+			"message": "Company interview scheduled",
+			"read": false,
+			"timestamp": "2026-04-22 17:51:30"
+		},
+		{
+			"id": "n_102",
+			"type": "Result",
+			"message": "Mid sem result published",
+			"read": false,
+			"timestamp": "2026-04-22 17:51:18"
+		},
+		{
+			"id": "n_103",
+			"type": "Event",
+			"message": "Tech fest announcement",
+			"read": false,
+			"timestamp": "2026-04-22 17:51:06"
+		}
+	]
+}
+```
+
+The inbox would show the top unread notifications first based on score and time.
+
+## Tradeoffs
+
+- Using memory is fast, but the data is lost if the app restarts.
+- Sorting every time is simple, but it can be slow when the list becomes large.
+- A heap or sorted list can improve performance, but it is a little more complex.
+
+## Conclusion
+
+I think the best solution is to fetch notifications from the API, score them by type and recency, and keep only the top 10 unread items in memory. This keeps the inbox simple, fast, and easy to maintain.
+
+
