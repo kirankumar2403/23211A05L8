@@ -1,4 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
+import Container from '@mui/material/Container';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 const API_URL = '/evaluation-service/notifications';
 const TOKEN = import.meta.env.VITE_AUTH_TOKEN || '';
@@ -11,7 +27,6 @@ function loadViewed() {
     return [];
   }
 }
-
 
 function saveViewed(ids) {
   localStorage.setItem('viewed-notifications', JSON.stringify(ids));
@@ -65,7 +80,7 @@ export default function App() {
           timestamp: item.Timestamp || item.timestamp,
         })));
       } catch (err) {
-        setError(err.message);
+        setError(err.message || String(err));
       } finally {
         setLoading(false);
       }
@@ -87,69 +102,78 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">React App</p>
-          <h1>Notification Inbox</h1>
-          <p className="subtitle">All notifications and priority notifications in one clean dashboard.</p>
-        </div>
-        <div className="hero-card">
-          <strong>{visibleItems.length}</strong>
-          <span>Visible items</span>
-        </div>
-      </section>
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Notification Inbox
+          </Typography>
+          <Chip label={`${visibleItems.length} visible`} color="secondary" />
+        </Toolbar>
+      </AppBar>
 
-      <section className="toolbar">
-        <button className={tab === 'priority' ? 'active' : ''} onClick={() => setTab('priority')}>Priority</button>
-        <button className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>All</button>
-        <label>
-          Type
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            {TYPE_OPTIONS.map((option) => (
-              <option key={option || 'all'} value={option}>{option || 'All'}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Page
-          <input type="number" min="1" value={page} onChange={(e) => setPage(Number(e.target.value) || 1)} />
-        </label>
-        <label>
-          Limit
-          <input type="number" min="1" max="10" value={limit} onChange={(e) => setLimit(Number(e.target.value) || 10)} />
-        </label>
-        <label>
-          Top N
-          <input type="number" min="1" max="20" value={topN} onChange={(e) => setTopN(Number(e.target.value) || 10)} />
-        </label>
-      </section>
+      <Container sx={{ mt: 4, mb: 4 }}>
+        <Stack spacing={2}>
+          <Box display="flex" gap={2} alignItems="center">
+            <Button variant={tab === 'priority' ? 'contained' : 'outlined'} onClick={() => setTab('priority')}>Priority</Button>
+            <Button variant={tab === 'all' ? 'contained' : 'outlined'} onClick={() => setTab('all')}>All</Button>
 
-      <section className="summary">
-        <div><strong>{items.length}</strong><span>Loaded</span></div>
-        <div><strong>{priorityItems.length}</strong><span>Priority</span></div>
-        <div><strong>{viewed.length}</strong><span>Viewed</span></div>
-      </section>
+            <Box sx={{ minWidth: 160 }}>
+              <Select value={type} onChange={(e) => setType(e.target.value)} displayEmpty>
+                <MenuItem value="">All</MenuItem>
+                {TYPE_OPTIONS.filter(Boolean).map((option) => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </Box>
 
-      {loading && <p className="status">Loading notifications...</p>}
-      {error && <p className="status error">{error}</p>}
+            <TextField label="Page" type="number" size="small" value={page} onChange={(e) => setPage(Number(e.target.value) || 1)} sx={{ width: 100 }} />
+            <TextField label="Limit" type="number" size="small" value={limit} onChange={(e) => setLimit(Number(e.target.value) || 10)} sx={{ width: 100 }} />
+            <TextField label="Top N" type="number" size="small" value={topN} onChange={(e) => setTopN(Number(e.target.value) || 10)} sx={{ width: 100 }} />
+          </Box>
 
-      <section className="grid">
-        {visibleItems.map((item) => {
-          const isViewed = viewedSet.has(item.id);
-          return (
-            <article className="card" key={item.id}>
-              <div className="card-top">
-                <span className="tag">{item.type}</span>
-                <span className={isViewed ? 'badge viewed' : 'badge new'}>{isViewed ? 'Viewed' : 'New'}</span>
-              </div>
-              <p>{item.message}</p>
-              <small>{item.timestamp}</small>
-              <button onClick={() => markViewed(item.id)}>Mark viewed</button>
-            </article>
-          );
-        })}
-      </section>
-    </main>
+          <Box display="flex" gap={4}>
+            <Box>
+              <Typography variant="subtitle2">Loaded</Typography>
+              <Typography variant="h6">{items.length}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2">Priority</Typography>
+              <Typography variant="h6">{priorityItems.length}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2">Viewed</Typography>
+              <Typography variant="h6">{viewed.length}</Typography>
+            </Box>
+          </Box>
+
+          {loading && <Box display="flex" justifyContent="center"><CircularProgress /></Box>}
+          {error && <Alert severity="error">{error}</Alert>}
+
+          <Grid container spacing={2}>
+            {visibleItems.map((item) => {
+              const isViewed = viewedSet.has(item.id);
+              return (
+                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                  <Card>
+                    <CardContent>
+                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                        <Chip label={item.type || 'Unknown'} />
+                        <Chip label={isViewed ? 'Viewed' : 'New'} color={isViewed ? 'default' : 'primary'} />
+                      </Box>
+                      <Typography variant="body1" gutterBottom>{item.message}</Typography>
+                      <Typography variant="caption" color="text.secondary">{item.timestamp}</Typography>
+                      <Box mt={2}>
+                        <Button size="small" onClick={() => markViewed(item.id)}>Mark viewed</Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Stack>
+      </Container>
+    </>
   );
 }
