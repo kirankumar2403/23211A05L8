@@ -32,6 +32,27 @@ I would add only the useful indexes for this query, like:
 
 As it contain multiple indexes we can have a combined index on `(studentID, isRead, createdAt)` which would be better for this case.
 
-## Likely Computation Cost
+## Computation Cost
 
 The cost will be more intially but later on using indexes it will make search faster and efficient.
+
+## Query For Placement Notifications in Last 7 Days
+
+```sql
+SELECT id, studentID, notificationType, message, isRead, createdAt
+FROM notifications
+WHERE studentID = 1042
+  AND notificationType = 'Placement'
+  AND createdAt >= CURRENT_DATE - INTERVAL '7 days'
+ORDER BY createdAt DESC;
+```
+
+## On creating index
+
+```sql
+CREATE INDEX idx_notifications_student_read_created
+ON notifications (studentID, isRead, createdAt);
+```
+
+If this query run often, then this index helps us to fetch the data fastly.
+
