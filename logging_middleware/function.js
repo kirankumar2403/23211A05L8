@@ -10,5 +10,3 @@ if (fs.existsSync(envPath)) {
     if (!process.env[key]) process.env[key] = rest.join("=").replace(/^"|"$/g, "");
   }
 }
-
-(async () => console.log(await Log("backend", "error", "handler", "received string, expected bool")))();
