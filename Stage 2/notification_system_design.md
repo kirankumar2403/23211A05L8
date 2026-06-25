@@ -26,7 +26,7 @@ For storing notification data, I would choose **PostgreSQL**. I chose PostgreSQL
 | created_at | TIMESTAMP |
 | updated_at | TIMESTAMP |
 
-```sample sql
+### sample sql
 
 
 ```sql
@@ -47,6 +47,7 @@ CREATE INDEX idx_notifications_user_read ON notifications(user_id, read);
 These indexes will help to fetch notifications for a specific user and also filter by read/unread status **efficiently**.
 
 ## How the data grows
+```
 
 If the number of notifications becomes large, I would solve it by:
 
