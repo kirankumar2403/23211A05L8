@@ -56,6 +56,7 @@ If the number of notifications becomes large, I would solve it by:
 - using a queue if notifications are created in high volume
 
 ## REST API Queries
+```
 
 ### 1. Get all notifications
 
