@@ -15,10 +15,17 @@ import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import { Log } from 'logging_middleware/log.js';
 
 const API_URL = '/evaluation-service/notifications';
 const TOKEN = import.meta.env.VITE_AUTH_TOKEN || '';
 const TYPE_OPTIONS = ['','Event','Result','Placement'];
+
+function logEvent(level, pkg, message) {
+  Log('frontend', level, pkg, message).catch((err) => {
+    console.warn('Logging failed:', err.message || err);
+  });
+}
 
 function loadViewed() {
   try {
@@ -58,6 +65,7 @@ export default function App() {
     async function fetchNotifications() {
       setLoading(true);
       setError('');
+      logEvent('info', 'api', `Fetching notifications page=${page} limit=${Math.min(limit, 10)} type=${type || 'all'}`);
       try {
         const params = new URLSearchParams({
           page: String(page),
@@ -73,6 +81,7 @@ export default function App() {
         }
         const data = await response.json();
         const list = Array.isArray(data.notifications) ? data.notifications : [];
+        logEvent('info', 'api', `Fetched ${list.length} notifications`);
         setItems(list.map((item) => ({
           id: item.ID || item.id,
           type: item.Type || item.type,
@@ -80,6 +89,7 @@ export default function App() {
           timestamp: item.Timestamp || item.timestamp,
         })));
       } catch (err) {
+        logEvent('error', 'api', `Failed to fetch notifications: ${err.message || String(err)}`);
         setError(err.message || String(err));
       } finally {
         setLoading(false);
@@ -98,6 +108,7 @@ export default function App() {
   const visibleItems = tab === 'priority' ? priorityItems : allItems;
 
   function markViewed(id) {
+    logEvent('info', 'state', `Marked notification ${id} as viewed`);
     setViewed((current) => (current.includes(id) ? current : [...current, id]));
   }
 
